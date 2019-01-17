@@ -8,4 +8,7 @@
     <string name="main_empty_title">기록된 위치가 없습니다.</string>
     <string name="confirm_stop">작동을 멈추시겠습니까?</string>
     <string name="confirm_start">기록을 시작하시겠습니까? 권한을 받지 않았을 경우 권한 팝업이 나온 뒤에 시작됩니다.</string>
+    <string name="main_open">파일 열기</string>
+    <string name="main_share">파일 공유</string>
+    <string name="file_delete">파일 삭제</string>
 </resources>

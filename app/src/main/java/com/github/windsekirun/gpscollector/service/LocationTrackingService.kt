@@ -1,9 +1,6 @@
 package com.github.windsekirun.gpscollector.service
 
-import android.app.Activity
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,6 +10,7 @@ import android.os.Environment
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.github.windsekirun.baseapp.module.location.LocationTracker
 import com.github.windsekirun.baseapp.utils.catchAll
 import com.github.windsekirun.baseapp.utils.safeDispose
@@ -20,6 +18,7 @@ import com.github.windsekirun.baseapp.utils.subscribe
 import com.github.windsekirun.daggerautoinject.InjectService
 import com.github.windsekirun.gpscollector.R
 import com.github.windsekirun.gpscollector.item.GeoItem
+import com.github.windsekirun.gpscollector.main.MainActivity
 import com.github.windsekirun.gpscollector.main.event.ReloadListEvent
 import dagger.android.AndroidInjection
 import io.reactivex.disposables.Disposable
@@ -83,18 +82,27 @@ class LocationTrackingService : Service() {
         if (Build.VERSION.SDK_INT >= 26) {
             val name = getString(R.string.app_name)
             val description = getString(R.string.app_name)
-            val importance = NotificationManager.IMPORTANCE_LOW
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(id, name, importance)
             channel.description = description
             manager.createNotificationChannel(channel)
         }
 
+        val colorPrimary = ContextCompat.getColor(this, R.color.colorPrimary)
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        val pendingIntent = PendingIntent.getActivity(this, NOTIFICATION_ID, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+
         val notification = NotificationCompat.Builder(this, id)
                 .setContentText(getString(R.string.gps_service_running))
                 .setSmallIcon(R.drawable.ic_pushicon)
                 .setContentTitle(getString(R.string.app_name))
+                .setContentIntent(pendingIntent)
+                .setColor(colorPrimary)
+                .setColorized(true)
+                .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build()
 
         startForeground(NOTIFICATION_ID, notification)
@@ -103,7 +111,7 @@ class LocationTrackingService : Service() {
 
     private fun requestStopService() {
         stopTracking()
-        val content = locations.joinToString("\n") { "${it.first.asDateString("HH::mm:ss.SSS")} | ${it.second}" }
+        val content = locations.joinToString("\n") { "${it.first.asDateString("HH:mm:ss.SSS")} | ${it.second}" }
         val fileName = "${System.currentTimeMillis().asDateString()}.txt";
         val file = File(Environment.getExternalStorageDirectory(), "/GPSCollector/$fileName")
         file.parentFile.mkdirs()
