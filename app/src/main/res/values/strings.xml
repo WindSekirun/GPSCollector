@@ -13,7 +13,7 @@
     <string name="file_delete">파일 삭제</string>
     <string name="share_all">전체 공유</string>
     <string name="confirm_message">저장할 제목을 입력해주세요. 입력하지 않으면 저장한 시간으로 저장됩니다.</string>
-    <string name="share_with">Share with…</string>
-    <string name="open_with">Open with…</string>
-    <string name="share_message">Check out this file</string>
+    <string name="share_with">공유할 앱 선택…</string>
+    <string name="open_with">파일을 열을 앱 선택…</string>
+    <string name="share_message">이 파일을 확인해보세요!</string>
 </resources>
