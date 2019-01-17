@@ -42,6 +42,4 @@ pipeline {
       sendNotifications currentBuild.result
     }
   }
-  environment {
-  }
 }
