@@ -133,6 +133,8 @@ class LocationTrackingService : Service() {
     }
 
     private fun startTracking() {
+        locations.clear()
+
         disposable = locationTracker.getUpdateLocationCallback()
             .subscribe { data, _ ->
                 if (data == null) return@subscribe
