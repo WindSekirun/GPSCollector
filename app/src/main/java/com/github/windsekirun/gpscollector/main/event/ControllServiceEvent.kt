@@ -8,4 +8,4 @@ package com.github.windsekirun.gpscollector.main.event
  * Description:
  */
 
-class ControllServiceEvent(val stop: Boolean)
+class ControllServiceEvent(val stop: Boolean, val title: String = "")

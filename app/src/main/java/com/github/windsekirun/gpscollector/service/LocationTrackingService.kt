@@ -53,9 +53,8 @@ class LocationTrackingService : Service() {
             if (intent.action == null) return
 
             if (intent.action == REQUEST_STOP) {
-                requestStopService()
-            } else if (intent.action == REQUEST_START) {
-                requestStartService()
+                val title = intent.getStringExtra(REQUEST_STOP_TITLE) ?: ""
+                requestStopService(title)
             }
         }
     }
@@ -70,6 +69,8 @@ class LocationTrackingService : Service() {
                 addAction(REQUEST_STOP)
             })
         }
+
+        requestStartService()
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -94,25 +95,31 @@ class LocationTrackingService : Service() {
         val pendingIntent = PendingIntent.getActivity(this, NOTIFICATION_ID, intent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         val notification = NotificationCompat.Builder(this, id)
-                .setContentText(getString(R.string.gps_service_running))
-                .setSmallIcon(R.drawable.ic_pushicon)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentIntent(pendingIntent)
-                .setColor(colorPrimary)
-                .setColorized(true)
-                .setWhen(System.currentTimeMillis())
-                .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .build()
+            .setContentText(getString(R.string.gps_service_running))
+            .setSmallIcon(R.drawable.ic_pushicon)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentIntent(pendingIntent)
+            .setColor(colorPrimary)
+            .setColorized(true)
+            .setWhen(System.currentTimeMillis())
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
 
         startForeground(NOTIFICATION_ID, notification)
         startTracking()
     }
 
-    private fun requestStopService() {
+    private fun requestStopService(requestTitle: String) {
         stopTracking()
+
         val content = locations.joinToString("\n") { "${it.first.asDateString("HH:mm:ss.SSS")} | ${it.second}" }
-        val fileName = "${System.currentTimeMillis().asDateString()}.txt";
+        val fileName = if (requestTitle.isNotEmpty()) {
+            "$requestTitle.txt"
+        } else {
+            "${System.currentTimeMillis().asDateString()}.txt"
+        }
+
         val file = File(Environment.getExternalStorageDirectory(), "/GPSCollector/$fileName")
         file.parentFile.mkdirs()
 
@@ -120,17 +127,18 @@ class LocationTrackingService : Service() {
         EventBus.getDefault().post(ReloadListEvent())
         runDelayedOnUiThread({
             stopForeground(true)
+            unregisterReceiver(broadcastReceiver)
             stopSelf()
         }, 500)
     }
 
     private fun startTracking() {
         disposable = locationTracker.getUpdateLocationCallback()
-                .subscribe { data, _ ->
-                    if (data == null) return@subscribe
-                    Log.e(TAG, "startTracking: ${data.latitude}, ${data.longitude}");
-                    locations.add(System.currentTimeMillis() to GeoItem(data.latitude, data.longitude))
-                }
+            .subscribe { data, _ ->
+                if (data == null) return@subscribe
+                Log.e(TAG, "startTracking: ${data.latitude}, ${data.longitude}");
+                locations.add(System.currentTimeMillis() to GeoItem(data.latitude, data.longitude))
+            }
 
         locationTracker.setUpdateInterval(20, 10.0f)
         locationTracker.startTracking()
@@ -146,6 +154,7 @@ class LocationTrackingService : Service() {
         const val REQUEST_START = "bec35418-79d6-4cd7-b971-7af7cf70fe8f"
         const val NOTIFICATION_ID = 61421
         const val TAG = "LocationTrackingService"
+        const val REQUEST_STOP_TITLE = "92c812ae-44c8-4e5d-8d15-06a6a4a18f38"
 
         fun startService(activity: Activity) {
             val intent = Intent(activity, LocationTrackingService::class.java)
@@ -156,15 +165,14 @@ class LocationTrackingService : Service() {
                 activity.startService(intent)
             }
 
-            activity.startService(intent)
-        }
-
-        fun startTracking(activity: Activity) {
             activity.sendBroadcast(Intent(REQUEST_START))
         }
 
-        fun stopTracking(activity: Activity) {
-            activity.sendBroadcast(Intent(REQUEST_STOP))
+        fun stopService(activity: Activity, title: String = "") {
+            val intent = Intent(REQUEST_STOP).apply {
+                putExtra(REQUEST_STOP_TITLE, title)
+            }
+            activity.sendBroadcast(intent)
         }
     }
 }

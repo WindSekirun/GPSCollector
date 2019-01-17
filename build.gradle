@@ -25,6 +25,7 @@ allprojects {
         maven { url "https://jitpack.io" }
         maven { url 'http://devrepo.kakao.com:8088/nexus/content/groups/public/' }
         maven { url "https://repository.uzuki.live/artifactory/list/libs-release-local/" }
+        maven { url "https://dl.bintray.com/drummer-aidan/maven/" }
     }
 }
 

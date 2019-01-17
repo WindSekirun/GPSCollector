@@ -1,6 +1,8 @@
 package com.github.windsekirun.gpscollector.main
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 
 import com.github.windsekirun.baseapp.base.BaseActivity
 import com.github.windsekirun.daggerautoinject.InjectActivity
@@ -31,16 +33,23 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
         viewModel = getViewModel(MainViewModel::class.java)
         mBinding.viewModel = viewModel
 
-        LocationTrackingService.startService(this)
         initRecyclerView(mBinding.recyclerView, FileListItemAdapter::class.java)
+
+        mBinding.toolbar.inflateMenu(R.menu.menu_main)
+        mBinding.toolbar.setOnMenuItemClickListener {
+            when (it?.itemId) {
+                R.id.share_all -> viewModel.clickShareAll()
+            }
+            false
+        }
     }
 
     @Subscribe
     fun onControllServiceEvent(event: ControllServiceEvent) {
         if (event.stop) {
-            LocationTrackingService.stopTracking(this)
+            LocationTrackingService.stopService(this, event.title)
         } else {
-            LocationTrackingService.startTracking(this)
+            LocationTrackingService.startService(this)
         }
     }
 

@@ -2,12 +2,15 @@ package com.github.windsekirun.gpscollector.main
 
 import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.os.Environment
 import android.view.View
 import android.webkit.MimeTypeMap
 import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.LifecycleOwner
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.input.input
 import com.github.windsekirun.baseapp.base.BaseViewModel
 import com.github.windsekirun.daggerautoinject.InjectViewModel
 import com.github.windsekirun.gpscollector.MainApplication
@@ -48,12 +51,23 @@ constructor(application: MainApplication) : BaseViewModel(application) {
 
     fun clickStart(view: View) {
         if (startState.get()) {
-            showConfirmDialog(getString(R.string.confirm_stop)) { _, _ -> stopRecording() }
-        } else {
-            showConfirmDialog(getString(R.string.confirm_start)) { _, _ ->
-                requestPermission(F0 { startRecording() },
-                        Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+            MaterialDialog(requireActivity()).show {
+                title(R.string.confirm_stop)
+                message(R.string.confirm_message)
+                input(allowEmpty = true) { _, text ->
+                    stopRecording(text.toString())
+                }
+
+                negativeButton(android.R.string.cancel)
             }
+            return
+        }
+
+        showConfirmDialog(getString(R.string.confirm_start)) { _, _ ->
+            requestPermission(
+                F0 { startRecording() },
+                Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
+            )
         }
     }
 
@@ -63,9 +77,9 @@ constructor(application: MainApplication) : BaseViewModel(application) {
             file.mkdirs()
 
             val list = file.listFiles()
-                    .filter { it.extension == "txt" }
-                    .sortedByDescending { it.lastModified() }
-                    .toList()
+                .filter { it.extension == "txt" }
+                .sortedByDescending { it.lastModified() }
+                .toList()
 
             fileList.clear()
             fileList.addAll(list)
@@ -83,6 +97,41 @@ constructor(application: MainApplication) : BaseViewModel(application) {
         }
     }
 
+    fun clickShareAll() {
+        requestPermission(F0 {
+            val file = File(Environment.getExternalStorageDirectory(), "/GPSCollector/")
+            file.mkdirs()
+
+            val list = file.listFiles()
+                .filter { it.extension == "txt" }
+                .sortedByDescending { it.lastModified() }
+                .map { it.toUri() }
+                .toList()
+
+            if (list.isEmpty()) return@F0
+
+            val result = arrayListOf<Uri?>()
+            result.addAll(list)
+
+            val myMime = MimeTypeMap.getSingleton()
+            val mimeType = myMime.getMimeTypeFromExtension(file.listFiles()[0].extension)
+
+            val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, result)
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message))
+                type = mimeType
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(intent, getString(R.string.share_with))
+            if (intent.resolveActivity(getApplication<MainApplication>().packageManager) != null) {
+                startActivity(chooser)
+            }
+
+        }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
+
     private fun openFile(file: File) {
         val uri = file.toUri()
 
@@ -95,7 +144,7 @@ constructor(application: MainApplication) : BaseViewModel(application) {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        val chooser = Intent.createChooser(intent, "Open with...")
+        val chooser = Intent.createChooser(intent, getString(R.string.open_with))
         if (intent.resolveActivity(getApplication<MainApplication>().packageManager) != null) {
             startActivity(chooser)
         }
@@ -106,14 +155,15 @@ constructor(application: MainApplication) : BaseViewModel(application) {
         val myMime = MimeTypeMap.getSingleton()
         val mimeType = myMime.getMimeTypeFromExtension(file.extension)
 
-        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+        val intent = Intent(Intent.ACTION_SEND).apply {
             putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_TEXT, "Check out this file")
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message))
             type = mimeType
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         }
 
-        val chooser = Intent.createChooser(intent, "Share with...")
+        val chooser = Intent.createChooser(intent, getString(R.string.share_with))
         if (intent.resolveActivity(getApplication<MainApplication>().packageManager) != null) {
             startActivity(chooser)
         }
@@ -130,8 +180,8 @@ constructor(application: MainApplication) : BaseViewModel(application) {
         preferenceRepository.state = true
     }
 
-    private fun stopRecording() {
-        postEvent(ControllServiceEvent(true))
+    private fun stopRecording(text: String) {
+        postEvent(ControllServiceEvent(true, text))
         startState.set(false)
         preferenceRepository.state = false
     }
