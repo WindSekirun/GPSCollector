@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">GPSCollector</string>
+
+    <string name="stop">Stop</string>
+    <string name="start">Start</string>
+    <string name="gps_service_running">GPS 신호를 캡쳐하는 중입니다.</string>
+    <string name="main_empty_desc">새 위치를 기록하려면, 오른쪽 하단의\n + 버튼을 누르세요.</string>
+    <string name="main_empty_title">기록된 위치가 없습니다.</string>
+    <string name="confirm_stop">작동을 멈추시겠습니까?</string>
+    <string name="confirm_start">기록을 시작하시겠습니까? 권한을 받지 않았을 경우 권한 팝업이 나온 뒤에 시작됩니다.</string>
 </resources>

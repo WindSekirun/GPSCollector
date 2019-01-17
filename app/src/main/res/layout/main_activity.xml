@@ -23,22 +23,78 @@
             app:title="@string/app_name"
             app:titleTextColor="@color/white" />
 
-        <Button
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/bg_normal_button"
-            android:text="@{viewModel.startButtonText}"
+            android:layout_height="0dp"
+            android:visibility="@{!viewModel.fileList.isEmpty()}"
+            app:items="@{viewModel.fileList}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            tools:layout_editor_absoluteX="0dp" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="@{viewModel.fileList.isEmpty()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/recyclerView"
+            tools:layout_editor_absoluteX="0dp">
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:src="@drawable/ic_empty_icon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/main_empty_title"
+                android:textColor="#afb0b8"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/main_empty_desc"
+                android:textColor="#aaabb3"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/button2"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:onClick="@{viewModel::clickStart}"
+            android:src="@drawable/ic_plus_white_24dp"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="25sp"
+            app:backgroundTint="@color/colorPrimaryDark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             tools:text="Start!" />
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
