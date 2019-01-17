@@ -14,11 +14,6 @@ pipeline {
             sh 'echo "sdk.dir=/opt/android-sdk-linux" >> local.properties'
           }
         }
-        stage('Touch google-services.json') {
-                  steps {
-                    sh 'echo $GOOGLE_SERVICES_JSON | base64 --decode --ignore-garbage > app/google-services.json'
-                  }
-                }
         stage('Display directory') {
           steps {
             sh 'ls -la'
