@@ -40,6 +40,7 @@ import javax.inject.Inject
  * Description:
  */
 
+// regex [0-9]+:[0-9]+:[0-9]+.[0-9]+ \|
 @InjectService
 class LocationTrackingService : Service() {
     @Inject lateinit var locationTracker: LocationTracker
@@ -143,7 +144,7 @@ class LocationTrackingService : Service() {
             }
 
         locationTracker.setUpdateInterval(20, 10.0f)
-        locationTracker.startTracking()
+        locationTracker.startTracking(LocationTracker.TargetLocationProvider.GPS)
     }
 
     private fun stopTracking() {
