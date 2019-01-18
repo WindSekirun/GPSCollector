@@ -6,13 +6,13 @@
     <string name="gps_service_running">GPS 신호를 가져오고 있는 중입니다.</string>
     <string name="main_empty_desc">새 위치를 기록하려면, 오른쪽 하단의\n + 버튼을 누르세요.</string>
     <string name="main_empty_title">기록된 위치가 없습니다.</string>
-    <string name="confirm_stop">작동을 멈추시겠습니까?</string>
-    <string name="confirm_start">기록을 시작하시겠습니까?</string>
+    <string name="confirm_stop">GPS 기록을 멈추시겠습니까?</string>
+    <string name="confirm_start">GPS 기록을 시작하시겠습니까?</string>
     <string name="main_open">파일 열기</string>
     <string name="main_share">파일 공유</string>
     <string name="file_delete">파일 삭제</string>
     <string name="share_all">전체 공유</string>
-    <string name="confirm_message">저장할 제목을 입력해주세요. 입력하지 않으면 저장한 시간으로 저장됩니다.</string>
+    <string name="confirm_message">저장할 파일의 제목을 입력해주세요. 입력하지 않으면 현재 시간으로 저장됩니다.</string>
     <string name="share_with">공유할 앱 선택…</string>
     <string name="open_with">파일을 열을 앱 선택…</string>
     <string name="share_message">이 파일을 확인해보세요!</string>
