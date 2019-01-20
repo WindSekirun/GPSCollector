@@ -20,6 +20,8 @@ import com.github.windsekirun.gpscollector.R
 import com.github.windsekirun.gpscollector.item.GeoItem
 import com.github.windsekirun.gpscollector.main.MainActivity
 import com.github.windsekirun.gpscollector.main.event.ReloadListEvent
+import com.github.windsekirun.gpscollector.processor.KalmanProcessor
+import com.github.windsekirun.kalmankt.model.LocationKt
 import dagger.android.AndroidInjection
 import io.reactivex.disposables.Disposable
 import org.greenrobot.eventbus.EventBus
@@ -47,6 +49,7 @@ class LocationTrackingService : Service() {
 
     private var disposable: Disposable? = null
     private val locations = mutableListOf<Pair<Long, GeoItem>>()
+    private val kalmanProcessor = KalmanProcessor()
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -71,6 +74,7 @@ class LocationTrackingService : Service() {
             })
         }
 
+        kalmanProcessor.reset(8, 2)
         requestStartService()
     }
 
@@ -139,12 +143,27 @@ class LocationTrackingService : Service() {
         disposable = locationTracker.getUpdateLocationCallback()
             .subscribe { data, _ ->
                 if (data == null) return@subscribe
-                Log.e(TAG, "startTracking: ${data.latitude}, ${data.longitude}");
-                locations.add(System.currentTimeMillis() to GeoItem(data.latitude, data.longitude))
+                Log.e(TAG, "startTracking: ${data.latitude}, ${data.longitude}")
+
+                val locationKt = LocationKt().apply {
+                    setLatitude(data.latitude)
+                    setLongitude(data.longitude)
+                    setAccuracy(data.accuracy.toDouble())
+                    setAltitude(data.altitude)
+                    setBearing(data.bearing.toDouble())
+                    setSpeed(data.speed.toDouble())
+                    setTimestamp(data.time)
+                }
+
+                kalmanProcessor.process(locationKt)
             }
 
         locationTracker.setUpdateInterval(20, 10.0f)
         locationTracker.startTracking(LocationTracker.TargetLocationProvider.GPS)
+
+        kalmanProcessor.setLocationCallback(1000) {
+            locations.add(System.currentTimeMillis() to GeoItem(it.getLatitude(), it.getLongitude()))
+        }
     }
 
     private fun stopTracking() {
