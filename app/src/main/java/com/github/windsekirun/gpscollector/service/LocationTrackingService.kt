@@ -144,18 +144,7 @@ class LocationTrackingService : Service() {
             .subscribe { data, _ ->
                 if (data == null) return@subscribe
                 Log.e(TAG, "startTracking: ${data.latitude}, ${data.longitude}")
-
-                val locationKt = LocationKt().apply {
-                    setLatitude(data.latitude)
-                    setLongitude(data.longitude)
-                    setAccuracy(data.accuracy.toDouble())
-                    setAltitude(data.altitude)
-                    setBearing(data.bearing.toDouble())
-                    setSpeed(data.speed.toDouble())
-                    setTimestamp(data.time)
-                }
-
-                kalmanProcessor.process(locationKt)
+                kalmanProcessor.process(data)
             }
 
         locationTracker.setUpdateInterval(20, 10.0f)

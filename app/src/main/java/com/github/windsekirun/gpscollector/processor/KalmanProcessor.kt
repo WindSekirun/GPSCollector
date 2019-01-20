@@ -1,5 +1,6 @@
 package com.github.windsekirun.gpscollector.processor
 
+import android.location.Location
 import android.os.Handler
 import com.github.windsekirun.kalmankt.KalmanConstants
 import com.github.windsekirun.kalmankt.ext.toRadians
@@ -33,6 +34,10 @@ class KalmanProcessor {
         predicated = false
         lastLocation = null
         geoHashFilter.reset(precision, minPointCount)
+    }
+
+    fun process(location: Location) {
+        process(toLocationKt(location))
     }
 
     fun process(locationKt: LocationKt) {
@@ -125,4 +130,18 @@ class KalmanProcessor {
     }
 
     fun getFilteredList() = geoHashFilter.getFilteredTrack()
+
+    companion object {
+        fun toLocationKt(data: Location): LocationKt {
+            return LocationKt().apply {
+                setLatitude(data.latitude)
+                setLongitude(data.longitude)
+                setAccuracy(data.accuracy.toDouble())
+                setAltitude(data.altitude)
+                setBearing(data.bearing.toDouble())
+                setSpeed(data.speed.toDouble())
+                setTimestamp(data.time)
+            }
+        }
+    }
 }
