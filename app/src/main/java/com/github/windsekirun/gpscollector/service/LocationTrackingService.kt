@@ -144,14 +144,14 @@ class LocationTrackingService : Service() {
             .subscribe { data, _ ->
                 if (data == null) return@subscribe
                 Log.e(TAG, "startTracking: ${data.latitude}, ${data.longitude}")
-                kalmanProcessor.process(data)
+                locations.add(System.currentTimeMillis() to GeoItem(data.latitude, data.longitude))
             }
 
         locationTracker.setUpdateInterval(20, 10.0f)
         locationTracker.startTracking(LocationTracker.TargetLocationProvider.GPS)
 
-        kalmanProcessor.setLocationCallback(1000) {
-            locations.add(System.currentTimeMillis() to GeoItem(it.getLatitude(), it.getLongitude()))
+        kalmanProcessor.setLocationCallback(1500) {
+//            locations.add(System.currentTimeMillis() to GeoItem(it.getLatitude(), it.getLongitude()))
         }
     }
 
