@@ -21,7 +21,6 @@ import com.github.windsekirun.gpscollector.item.GeoItem
 import com.github.windsekirun.gpscollector.main.MainActivity
 import com.github.windsekirun.gpscollector.main.event.ReloadListEvent
 import com.github.windsekirun.gpscollector.processor.KalmanProcessor
-import com.github.windsekirun.kalmankt.model.LocationKt
 import dagger.android.AndroidInjection
 import io.reactivex.disposables.Disposable
 import org.greenrobot.eventbus.EventBus
@@ -151,7 +150,7 @@ class LocationTrackingService : Service() {
         locationTracker.startTracking(LocationTracker.TargetLocationProvider.GPS)
 
         kalmanProcessor.setLocationCallback(1500) {
-//            locations.add(System.currentTimeMillis() to GeoItem(it.getLatitude(), it.getLongitude()))
+            //            locations.add(System.currentTimeMillis() to GeoItem(it.getLatitude(), it.getLongitude()))
         }
     }
 
